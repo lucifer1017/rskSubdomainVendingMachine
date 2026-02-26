@@ -38,10 +38,13 @@ contract MockRNSRegistry is IRNSRegistry {
         bytes32 node,
         bytes32 label,
         address owner_
-    ) external returns (bytes32 subnode) {
-        subnode = keccak256(abi.encodePacked(node, label));
+    ) external {
+        bytes32 subnode = keccak256(abi.encodePacked(node, label));
         _owners[subnode] = owner_;
         emit NewOwner(node, label, owner_);
+        // mimic RNS behavior: propagate parent resolver to subnode
+        _resolvers[subnode] = _resolvers[node];
+        emit NewResolver(subnode, _resolvers[node]);
     }
 }
 

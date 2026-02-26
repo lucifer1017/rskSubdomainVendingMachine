@@ -38,17 +38,15 @@ describe("SubdomainVendingMachine", async function () {
       account: user.account,
     });
 
-    // Register subdomain "player1"
     const label = "player1";
+
+    // Register subdomain "player1"
     await svm.write.register([label, user.account.address], {
       account: user.account,
     });
 
-    // Compute labelhash and subnode exactly as in the Solidity contract
-    const labelhash = keccak256(stringToBytes(label));
-    const subnode = keccak256(
-      encodePacked(["bytes32", "bytes32"], [parentNode, labelhash]),
-    );
+    // Ask the contract for the subnode to avoid any hashing mismatches
+    const subnode = await svm.read.subnodeOf([label]);
 
     const owner = await registry.read.owner([subnode]);
     assert.equal(

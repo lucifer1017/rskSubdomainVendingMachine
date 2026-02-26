@@ -126,11 +126,11 @@ contract SubdomainVendingMachine is Ownable, Pausable, ReentrancyGuard {
             rifToken.safeTransferFrom(msg.sender, address(this), price);
         }
 
-        bytes32 createdSubnode = registry.setSubnodeOwner(parentNode, labelhash, address(this));
+        registry.setSubnodeOwner(parentNode, labelhash, address(this));
 
-        registry.setResolver(createdSubnode, address(resolver));
+        registry.setResolver(subnode, address(resolver));
 
-        registry.setOwner(createdSubnode, owner_);
+        registry.setOwner(subnode, owner_);
 
         emit SubdomainRegistered(parentNode, labelhash, owner_, price);
     }

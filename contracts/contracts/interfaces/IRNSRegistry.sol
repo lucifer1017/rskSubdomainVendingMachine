@@ -23,6 +23,6 @@ interface IRNSRegistry {
         bytes32 node,
         bytes32 label,
         address owner
-    ) external returns (bytes32 subnode);
+    ) external;
 }
 
