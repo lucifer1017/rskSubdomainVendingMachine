@@ -102,8 +102,8 @@ contract SubdomainVendingMachine is Ownable, Pausable, ReentrancyGuard {
     }
 
     function isAvailable(string calldata label) external view returns (bool) {
-        bytes32 labelhash = keccak256(abi.encodePacked(label));
-        bytes32 subnode = keccak256(abi.encodePacked(parentNode, labelhash));
+        bytes32 labelhash = _labelhash(label);
+        bytes32 subnode = _subnode(labelhash);
         return registry.owner(subnode) == address(0);
     }
 
@@ -113,12 +113,11 @@ contract SubdomainVendingMachine is Ownable, Pausable, ReentrancyGuard {
         whenNotPaused
     {
         if (owner_ == address(0)) revert ZeroAddress();
-        if (bytes(label).length == 0) revert EmptyLabel();
 
         if (registry.owner(parentNode) != address(this)) revert NotParentOwner();
 
-        bytes32 labelhash = keccak256(abi.encodePacked(label));
-        bytes32 subnode = keccak256(abi.encodePacked(parentNode, labelhash));
+        bytes32 labelhash = _labelhash(label);
+        bytes32 subnode = _subnode(labelhash);
 
         if (registry.owner(subnode) != address(0)) revert AlreadyRegistered();
 
@@ -134,6 +133,20 @@ contract SubdomainVendingMachine is Ownable, Pausable, ReentrancyGuard {
         registry.setOwner(createdSubnode, owner_);
 
         emit SubdomainRegistered(parentNode, labelhash, owner_, price);
+    }
+
+    function subnodeOf(string calldata label) external view returns (bytes32) {
+        bytes32 labelhash = _labelhash(label);
+        return _subnode(labelhash);
+    }
+
+    function _labelhash(string calldata label) private pure returns (bytes32) {
+        if (bytes(label).length == 0) revert EmptyLabel();
+        return keccak256(abi.encodePacked(label));
+    }
+
+    function _subnode(bytes32 labelhash) private view returns (bytes32) {
+        return keccak256(abi.encodePacked(parentNode, labelhash));
     }
 }
 
