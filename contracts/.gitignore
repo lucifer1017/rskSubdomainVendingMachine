@@ -20,4 +20,5 @@
 /coverage
 
 .env
-deployments
+
+ignition/deployments
