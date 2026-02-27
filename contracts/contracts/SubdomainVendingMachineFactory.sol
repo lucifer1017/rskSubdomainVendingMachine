@@ -15,8 +15,8 @@ contract SubdomainVendingMachineFactory {
     IRNSResolver public immutable defaultResolver;
     IERC20 public immutable rifToken;
 
-    mapping(bytes32 => address) public vendingMachines; // parentNode => vendingMachine address
-    mapping(address => bytes32[]) public ownerDomains; // owner => array of parentNodes
+    mapping(bytes32 => address) public vendingMachines;
+    mapping(address => bytes32[]) public ownerDomains;
 
     event VendingMachineDeployed(
         bytes32 indexed parentNode,
@@ -47,7 +47,6 @@ contract SubdomainVendingMachineFactory {
         if (vendingMachines[parentNode] != address(0)) revert AlreadyDeployed();
         if (owner == address(0)) revert ZeroAddress();
 
-        // Verify caller owns the parent domain
         if (registry.owner(parentNode) != msg.sender) {
             revert NotDomainOwner();
         }

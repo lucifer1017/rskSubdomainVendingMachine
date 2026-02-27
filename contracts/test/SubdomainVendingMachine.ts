@@ -8,18 +8,15 @@ describe("SubdomainVendingMachine", async function () {
   const { viem } = await network.connect();
 
   it("registers a subdomain, sets resolver, and transfers ownership", async function () {
-    // Deploy mocks
     const registry = await viem.deployContract("MockRNSRegistry");
     const resolver = await viem.deployContract("MockRNSResolver");
     const rifToken = await viem.deployContract("ERC20Mock", ["RIF", "RIF"]);
 
     const [deployer, user] = await viem.getWalletClients();
 
-    const parentNode = ("0x" +
-      "aa".repeat(32)) as `0x${string}`; // arbitrary non-zero node
+    const parentNode = ("0x" + "aa".repeat(32)) as `0x${string}`;
     const initialPrice = 10n * 10n ** 18n;
 
-    // Deploy the vending machine
     const svm = await viem.deployContract("SubdomainVendingMachine", [
       registry.address,
       resolver.address,
@@ -29,10 +26,8 @@ describe("SubdomainVendingMachine", async function () {
       deployer.account.address,
     ]);
 
-    // Give the vending machine contract ownership of the parent node.
     await registry.write.setOwner([parentNode, svm.address]);
 
-    // Mint RIF to user and approve vending machine
     await rifToken.write.mint([user.account.address, initialPrice]);
     await rifToken.write.approve([svm.address, initialPrice], {
       account: user.account,
@@ -40,12 +35,10 @@ describe("SubdomainVendingMachine", async function () {
 
     const label = "player1";
 
-    // Register subdomain "player1"
     await svm.write.register([label, user.account.address], {
       account: user.account,
     });
 
-    // Ask the contract for the subnode to avoid any hashing mismatches
     const subnode = await svm.read.subnodeOf([label]);
 
     const owner = await registry.read.owner([subnode]);

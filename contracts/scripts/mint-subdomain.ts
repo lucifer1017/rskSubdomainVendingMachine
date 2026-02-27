@@ -1,6 +1,6 @@
 import { network } from "hardhat";
 
-const vendingAddress = "0xA5aDE9b4A6076c88f007D261f0562C0657a20d2E"; // New deployment
+const vendingAddress = "0xA5aDE9b4A6076c88f007D261f0562C0657a20d2E";
 const label = "player1";
 
 async function main() {

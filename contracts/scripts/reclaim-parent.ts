@@ -1,7 +1,7 @@
 import { network } from "hardhat";
 
-const vendingAddress = "0xB3bf60b97D57d46588e8Ba5Eb51D6C05E46014E5"; // old vending machine
-const yourAddress = "0x0dd350d76a265890B9cfeD579DDdbb4D343fF747";   // your EOA
+const vendingAddress = "0xB3bf60b97D57d46588e8Ba5Eb51D6C05E46014E5";
+const yourAddress = "0x0dd350d76a265890B9cfeD579DDdbb4D343fF747";
 
 async function main() {
   const { viem } = await network.connect({ network: "rskTestnet", chainType: "l1" });

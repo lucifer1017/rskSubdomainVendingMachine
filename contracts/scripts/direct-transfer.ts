@@ -1,7 +1,7 @@
 import { network } from "hardhat";
 import { namehash } from "viem";
 
-const vendingAddress = "0xa5ade9b4a6076c88f007d261f0562c0657a20d2e"; // lowercase to avoid checksum issues
+const vendingAddress = "0xa5ade9b4a6076c88f007d261f0562c0657a20d2e";
 const yourAddress = "0x0dd350d76a265890b9cfed579dddbb4d343ff747";
 
 async function main() {
@@ -18,7 +18,6 @@ async function main() {
   console.log("To (vending machine):", vendingAddress);
   console.log("Parent Node:", parentNode);
 
-  // Check current owner
   const currentOwner = await registry.read.owner([parentNode]);
   console.log("\nCurrent owner:", currentOwner);
   
@@ -39,7 +38,6 @@ async function main() {
 
   console.log("Transaction mined in block:", receipt.blockNumber);
 
-  // Verify
   const newOwner = await registry.read.owner([parentNode]);
   console.log("\nNew owner:", newOwner);
   console.log("Transfer successful:", newOwner.toLowerCase() === vendingAddress.toLowerCase());
