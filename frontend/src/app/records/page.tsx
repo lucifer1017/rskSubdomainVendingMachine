@@ -8,37 +8,60 @@ import {
   SUBDOMAIN_VENDING_MACHINE_ADDRESS,
   SUBDOMAIN_VENDING_MACHINE_ABI,
 } from "@/lib/contract";
+import { FACTORY_ADDRESS, FACTORY_ABI } from "@/lib/factory";
 import { RNS_RESOLVER_ABI, RNS_REGISTRY_ABI } from "@/lib/rns-resolver";
 import Link from "next/link";
 
+const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
+
 export default function RecordsPage() {
   const { address, isConnected } = useAccount();
+  const [parentDomain, setParentDomain] = useState("random1996.rsk");
   const [subdomainLabel, setSubdomainLabel] = useState("");
   const [newAddress, setNewAddress] = useState("");
   const [textKey, setTextKey] = useState("");
   const [textValue, setTextValue] = useState("");
 
-  // Get registry and resolver addresses
+  // Resolve vending machine for parent domain
+  const parentNode = parentDomain.trim() ? namehash(parentDomain.trim()) : undefined;
+  const { data: vmAddress } = useReadContract({
+    address: FACTORY_ADDRESS,
+    abi: FACTORY_ABI,
+    functionName: "getVendingMachine",
+    args: parentNode ? [parentNode] : undefined,
+    query: {
+      enabled: !!parentNode && FACTORY_ADDRESS !== ZERO_ADDRESS,
+    },
+  });
+
+  const activeVmAddress =
+    vmAddress && vmAddress !== ZERO_ADDRESS
+      ? vmAddress
+      : parentDomain === "random1996.rsk"
+        ? SUBDOMAIN_VENDING_MACHINE_ADDRESS
+        : null;
+
   const { data: registryAddress } = useReadContract({
-    address: SUBDOMAIN_VENDING_MACHINE_ADDRESS,
+    address: activeVmAddress as `0x${string}`,
     abi: SUBDOMAIN_VENDING_MACHINE_ABI,
     functionName: "registry",
+    query: { enabled: !!activeVmAddress },
   });
 
   const { data: resolverAddress } = useReadContract({
-    address: SUBDOMAIN_VENDING_MACHINE_ADDRESS,
+    address: activeVmAddress as `0x${string}`,
     abi: SUBDOMAIN_VENDING_MACHINE_ABI,
     functionName: "resolver",
+    query: { enabled: !!activeVmAddress },
   });
 
-  // Get subnode for the label
   const { data: subnode } = useReadContract({
-    address: SUBDOMAIN_VENDING_MACHINE_ADDRESS,
+    address: activeVmAddress as `0x${string}`,
     abi: SUBDOMAIN_VENDING_MACHINE_ABI,
     functionName: "subnodeOf",
     args: subdomainLabel.trim() ? [subdomainLabel.trim()] : undefined,
     query: {
-      enabled: !!subdomainLabel.trim(),
+      enabled: !!subdomainLabel.trim() && !!activeVmAddress,
     },
   });
 
@@ -128,13 +151,13 @@ export default function RecordsPage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-zinc-900 dark:via-zinc-800 dark:to-zinc-900">
       <div className="container mx-auto px-4 py-16">
         {/* Header */}
-        <div className="flex justify-between items-center mb-12">
+        <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-4xl font-bold text-zinc-900 dark:text-white mb-2">
               Record Management
             </h1>
             <p className="text-zinc-600 dark:text-zinc-400">
-              Set address and text records for your subdomain
+              Set address and text records for subdomains you minted
             </p>
           </div>
           <div className="flex gap-4 items-center">
@@ -146,6 +169,12 @@ export default function RecordsPage() {
             </Link>
             <ConnectButton />
           </div>
+        </div>
+
+        <div className="max-w-2xl mb-8 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+          <p className="text-sm text-blue-800 dark:text-blue-200">
+            <strong>Ownership:</strong> You own <em>subdomains you minted</em> (e.g. player1.random1996.rsk). Enter the label you minted (e.g. player1) below. The parent domain is owned by the vending machine—that&apos;s correct.
+          </p>
         </div>
 
         {!isConnected ? (
@@ -160,18 +189,28 @@ export default function RecordsPage() {
             {/* Subdomain Input */}
             <div className="bg-white dark:bg-zinc-800 rounded-xl shadow-lg p-6 border border-zinc-200 dark:border-zinc-700">
               <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-                Your Subdomain
+                Parent Domain
+              </label>
+              <input
+                type="text"
+                value={parentDomain}
+                onChange={(e) => setParentDomain(e.target.value)}
+                placeholder="random1996.rsk"
+                className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white mb-4"
+              />
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                Subdomain Label (the part you minted, e.g. player1)
               </label>
               <div className="flex gap-2">
                 <input
                   type="text"
                   value={subdomainLabel}
                   onChange={(e) => setSubdomainLabel(e.target.value)}
-                  placeholder="yourname"
+                  placeholder="player1"
                   className="flex-1 px-4 py-3 border border-zinc-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <span className="px-4 py-3 bg-zinc-100 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 rounded-lg font-mono">
-                  .random1996.rsk
+                  .{parentDomain || "domain.rsk"}
                 </span>
               </div>
               {subdomainLabel.trim() && (

@@ -23,17 +23,15 @@ export function ConnectButton() {
     );
   }
 
+  const connector =
+    connectors.find((c) => c.name.toLowerCase().includes("metamask")) ?? connectors[0];
+
   return (
-    <div className="flex gap-2">
-      {connectors.map((connector) => (
-        <button
-          key={connector.uid}
-          onClick={() => connect({ connector })}
-          className="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors"
-        >
-          Connect {connector.name}
-        </button>
-      ))}
-    </div>
+    <button
+      onClick={() => connector && connect({ connector })}
+      className="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors"
+    >
+      Connect {connector?.name === "Injected" ? "MetaMask" : connector?.name ?? "Wallet"}
+    </button>
   );
 }

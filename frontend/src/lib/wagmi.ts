@@ -1,6 +1,6 @@
 import { createConfig, http } from "wagmi";
 import { defineChain } from "viem";
-import { injected, metaMask, walletConnect } from "wagmi/connectors";
+import { injected } from "wagmi/connectors";
 
 // Rootstock Testnet chain definition
 const rootstockTestnet = defineChain({
@@ -30,11 +30,7 @@ const rootstockTestnet = defineChain({
 export const wagmiConfig = createConfig({
   chains: [rootstockTestnet],
   connectors: [
-    injected(),
-    metaMask(),
-    walletConnect({
-      projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "",
-    }),
+    injected(), // Works with MetaMask, Coinbase Wallet, and other injected wallets
   ],
   transports: {
     [rootstockTestnet.id]: http(),

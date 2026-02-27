@@ -1,31 +1,72 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
-import { formatEther, parseEther } from "viem";
+import { formatEther, parseEther, namehash } from "viem";
 import { ConnectButton } from "@/components/connect-button";
 import {
   SUBDOMAIN_VENDING_MACHINE_ADDRESS,
   SUBDOMAIN_VENDING_MACHINE_ABI,
 } from "@/lib/contract";
+import { FACTORY_ADDRESS, FACTORY_ABI } from "@/lib/factory";
 
-export default function Home() {
+function HomePageContent() {
+  const searchParams = useSearchParams();
   const { address, isConnected } = useAccount();
   const [label, setLabel] = useState("");
   const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
+  const [domainName, setDomainName] = useState(searchParams.get("domain") || "");
+  const [vendingMachineAddress, setVendingMachineAddress] = useState<`0x${string}` | null>(null);
+  
+  // Compute parent node from domain name
+  const parentNode = domainName ? namehash(domainName) : undefined;
+  
+  // Get vending machine address from factory
+  const { data: vmAddress } = useReadContract({
+    address: FACTORY_ADDRESS,
+    abi: FACTORY_ABI,
+    functionName: "getVendingMachine",
+    args: parentNode ? [parentNode] : undefined,
+    query: {
+      enabled: !!parentNode && FACTORY_ADDRESS !== "0x0000000000000000000000000000000000000000",
+    },
+  });
+  
+  useEffect(() => {
+    if (searchParams.get("domain")) {
+      setDomainName(searchParams.get("domain") || "");
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (vmAddress && vmAddress !== "0x0000000000000000000000000000000000000000") {
+      setVendingMachineAddress(vmAddress);
+    } else if (domainName === "random1996.rsk") {
+      setVendingMachineAddress(SUBDOMAIN_VENDING_MACHINE_ADDRESS);
+    } else {
+      setVendingMachineAddress(null);
+    }
+  }, [vmAddress, domainName]);
 
   // Read contract state
   const { data: price } = useReadContract({
-    address: SUBDOMAIN_VENDING_MACHINE_ADDRESS,
+    address: vendingMachineAddress || SUBDOMAIN_VENDING_MACHINE_ADDRESS,
     abi: SUBDOMAIN_VENDING_MACHINE_ABI,
     functionName: "pricePerSubdomain",
+    query: {
+      enabled: !!vendingMachineAddress,
+    },
   });
 
   const { data: paused } = useReadContract({
-    address: SUBDOMAIN_VENDING_MACHINE_ADDRESS,
+    address: vendingMachineAddress || SUBDOMAIN_VENDING_MACHINE_ADDRESS,
     abi: SUBDOMAIN_VENDING_MACHINE_ABI,
     functionName: "paused",
+    query: {
+      enabled: !!vendingMachineAddress,
+    },
   });
 
   // Write contract
@@ -35,12 +76,12 @@ export default function Home() {
   });
 
   const { data: availability } = useReadContract({
-    address: SUBDOMAIN_VENDING_MACHINE_ADDRESS,
+    address: vendingMachineAddress || SUBDOMAIN_VENDING_MACHINE_ADDRESS,
     abi: SUBDOMAIN_VENDING_MACHINE_ABI,
     functionName: "isAvailable",
     args: label.trim() ? [label.trim()] : undefined,
     query: {
-      enabled: !!label.trim(),
+      enabled: !!label.trim() && !!vendingMachineAddress,
     },
   });
 
@@ -51,11 +92,11 @@ export default function Home() {
   };
 
   const handleMint = async () => {
-    if (!isConnected || !address || !label.trim()) return;
+    if (!isConnected || !address || !label.trim() || !vendingMachineAddress) return;
 
     try {
       writeContract({
-        address: SUBDOMAIN_VENDING_MACHINE_ADDRESS,
+        address: vendingMachineAddress,
         abi: SUBDOMAIN_VENDING_MACHINE_ABI,
         functionName: "register",
         args: [label.trim(), address],
@@ -75,7 +116,7 @@ export default function Home() {
               RNS Subdomain Vending
             </h1>
             <p className="text-zinc-600 dark:text-zinc-400">
-              Mint your subdomain on random1996.rsk
+              Mint subdomains on any .rsk domain with a vending machine
             </p>
           </div>
           <div className="flex gap-4 items-center">
@@ -123,6 +164,18 @@ export default function Home() {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                  Parent Domain (e.g., guild.rsk, random1996.rsk)
+                </label>
+                <input
+                  type="text"
+                  value={domainName}
+                  onChange={(e) => setDomainName(e.target.value)}
+                  placeholder="random1996.rsk"
+                  className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white mb-4"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                   Subdomain Name
                 </label>
                 <div className="flex gap-2">
@@ -134,7 +187,7 @@ export default function Home() {
                     className="flex-1 px-4 py-3 border border-zinc-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   <span className="px-4 py-3 bg-zinc-100 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 rounded-lg font-mono">
-                    .random1996.rsk
+                    .{domainName || "domain.rsk"}
                   </span>
                 </div>
               </div>
@@ -170,12 +223,22 @@ export default function Home() {
                 </div>
               )}
 
+              {!vendingMachineAddress && domainName && (
+                <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                  <p className="text-yellow-800 dark:text-yellow-200 text-sm">
+                    No vending machine for {domainName}. The domain owner must deploy one via Admin first.
+                  </p>
+                </div>
+              )}
+
               {/* Mint Button */}
               <button
                 onClick={handleMint}
                 disabled={
                   !isConnected ||
                   !label.trim() ||
+                  !domainName ||
+                  !vendingMachineAddress ||
                   !!paused ||
                   isPending ||
                   isConfirming ||
@@ -189,7 +252,7 @@ export default function Home() {
                     ? "Processing..."
                     : isSuccess
                       ? "✅ Minted!"
-                      : `Mint ${label.trim() || "Subdomain"}.random1996.rsk`}
+                      : `Mint ${label.trim() || "Subdomain"}.${domainName || "domain.rsk"}`}
               </button>
 
               {/* Success Message */}
@@ -215,5 +278,17 @@ export default function Home() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-zinc-900 dark:via-zinc-800 dark:to-zinc-900 flex items-center justify-center">
+        <div className="text-zinc-600 dark:text-zinc-400">Loading...</div>
+      </div>
+    }>
+      <HomePageContent />
+    </Suspense>
   );
 }
