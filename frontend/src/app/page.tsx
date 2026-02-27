@@ -19,11 +19,8 @@ function HomePageContent() {
   const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
   const [domainName, setDomainName] = useState(searchParams.get("domain") || "");
   const [vendingMachineAddress, setVendingMachineAddress] = useState<`0x${string}` | null>(null);
-  
-  // Compute parent node from domain name
+
   const parentNode = domainName ? namehash(domainName) : undefined;
-  
-  // Get vending machine address from factory
   const { data: vmAddress } = useReadContract({
     address: FACTORY_ADDRESS,
     abi: FACTORY_ABI,
@@ -50,7 +47,6 @@ function HomePageContent() {
     }
   }, [vmAddress, domainName]);
 
-  // Read contract state
   const { data: price } = useReadContract({
     address: vendingMachineAddress || SUBDOMAIN_VENDING_MACHINE_ADDRESS,
     abi: SUBDOMAIN_VENDING_MACHINE_ABI,
@@ -69,7 +65,6 @@ function HomePageContent() {
     },
   });
 
-  // Write contract
   const { writeContract, data: hash, isPending } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash,
@@ -109,7 +104,6 @@ function HomePageContent() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-zinc-900 dark:via-zinc-800 dark:to-zinc-900">
       <div className="container mx-auto px-4 py-16">
-        {/* Header */}
         <div className="flex justify-between items-center mb-12">
           <div>
             <h1 className="text-4xl font-bold text-zinc-900 dark:text-white mb-2">
@@ -136,10 +130,8 @@ function HomePageContent() {
           </div>
         </div>
 
-        {/* Main Card */}
         <div className="max-w-2xl mx-auto">
           <div className="bg-white dark:bg-zinc-800 rounded-2xl shadow-xl p-8 border border-zinc-200 dark:border-zinc-700">
-            {/* Status Badge */}
             {paused && (
               <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
                 <p className="text-red-800 dark:text-red-200 font-medium">
@@ -148,7 +140,6 @@ function HomePageContent() {
               </div>
             )}
 
-            {/* Price Display */}
             {price !== undefined && (
               <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
                 <p className="text-sm text-blue-600 dark:text-blue-400 mb-1">
@@ -160,7 +151,6 @@ function HomePageContent() {
               </div>
             )}
 
-            {/* Input Section */}
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
@@ -192,7 +182,6 @@ function HomePageContent() {
                 </div>
               </div>
 
-              {/* Availability Check */}
               {label.trim() && (
                 <button
                   onClick={checkAvailability}
@@ -202,7 +191,6 @@ function HomePageContent() {
                 </button>
               )}
 
-              {/* Availability Result */}
               {isAvailable !== null && (
                 <div
                   className={`p-4 rounded-lg ${
@@ -231,7 +219,6 @@ function HomePageContent() {
                 </div>
               )}
 
-              {/* Mint Button */}
               <button
                 onClick={handleMint}
                 disabled={
@@ -255,7 +242,6 @@ function HomePageContent() {
                       : `Mint ${label.trim() || "Subdomain"}.${domainName || "domain.rsk"}`}
               </button>
 
-              {/* Success Message */}
               {isSuccess && (
                 <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
                   <p className="text-green-800 dark:text-green-200 font-medium">

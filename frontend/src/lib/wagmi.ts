@@ -2,7 +2,6 @@ import { createConfig, http } from "wagmi";
 import { defineChain } from "viem";
 import { injected } from "wagmi/connectors";
 
-// Rootstock Testnet chain definition
 const rootstockTestnet = defineChain({
   id: 31,
   name: "Rootstock Testnet",
@@ -29,9 +28,7 @@ const rootstockTestnet = defineChain({
 
 export const wagmiConfig = createConfig({
   chains: [rootstockTestnet],
-  connectors: [
-    injected(), // Works with MetaMask, Coinbase Wallet, and other injected wallets
-  ],
+  connectors: [injected()],
   transports: {
     [rootstockTestnet.id]: http(),
   },

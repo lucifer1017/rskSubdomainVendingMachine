@@ -22,7 +22,6 @@ export default function RecordsPage() {
   const [textKey, setTextKey] = useState("");
   const [textValue, setTextValue] = useState("");
 
-  // Resolve vending machine for parent domain
   const parentNode = parentDomain.trim() ? namehash(parentDomain.trim()) : undefined;
   const { data: vmAddress } = useReadContract({
     address: FACTORY_ADDRESS,
@@ -65,7 +64,6 @@ export default function RecordsPage() {
     },
   });
 
-  // Check if user owns the subdomain
   const { data: subdomainOwner } = useReadContract({
     address: registryAddress as `0x${string}`,
     abi: RNS_REGISTRY_ABI,
@@ -82,7 +80,6 @@ export default function RecordsPage() {
     subdomainOwner &&
     address.toLowerCase() === subdomainOwner.toLowerCase();
 
-  // Read current address record
   const { data: currentAddress } = useReadContract({
     address: resolverAddress as `0x${string}`,
     abi: RNS_RESOLVER_ABI,
@@ -93,7 +90,6 @@ export default function RecordsPage() {
     },
   });
 
-  // Read current text record (example: description)
   const { data: currentText } = useReadContract({
     address: resolverAddress as `0x${string}`,
     abi: RNS_RESOLVER_ABI,
@@ -104,7 +100,6 @@ export default function RecordsPage() {
     },
   });
 
-  // Write contracts
   const { writeContract: setAddrWrite, data: setAddrHash } = useWriteContract();
   const { writeContract: setTextWrite, data: setTextHash } = useWriteContract();
 
@@ -150,7 +145,6 @@ export default function RecordsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-zinc-900 dark:via-zinc-800 dark:to-zinc-900">
       <div className="container mx-auto px-4 py-16">
-        {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-4xl font-bold text-zinc-900 dark:text-white mb-2">
@@ -186,7 +180,6 @@ export default function RecordsPage() {
           </div>
         ) : (
           <div className="max-w-2xl mx-auto space-y-6">
-            {/* Subdomain Input */}
             <div className="bg-white dark:bg-zinc-800 rounded-xl shadow-lg p-6 border border-zinc-200 dark:border-zinc-700">
               <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                 Parent Domain
@@ -229,7 +222,6 @@ export default function RecordsPage() {
               )}
             </div>
 
-            {/* Address Record */}
             {isOwner && (
               <div className="bg-white dark:bg-zinc-800 rounded-xl shadow-lg p-6 border border-zinc-200 dark:border-zinc-700">
                 <h2 className="text-xl font-bold text-zinc-900 dark:text-white mb-4">
@@ -267,7 +259,6 @@ export default function RecordsPage() {
               </div>
             )}
 
-            {/* Text Records */}
             {isOwner && (
               <div className="bg-white dark:bg-zinc-800 rounded-xl shadow-lg p-6 border border-zinc-200 dark:border-zinc-700">
                 <h2 className="text-xl font-bold text-zinc-900 dark:text-white mb-4">

@@ -1,4 +1,3 @@
-// RNS Public Resolver ABI (minimal interface for addr and text records)
 export const RNS_RESOLVER_ABI = [
   {
     inputs: [
@@ -86,7 +85,6 @@ export const RNS_RESOLVER_ABI = [
   },
 ] as const;
 
-// RNS Registry ABI (minimal interface for owner and resolver)
 export const RNS_REGISTRY_ABI = [
   {
     inputs: [

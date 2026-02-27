@@ -23,19 +23,13 @@ export default function AdminPage() {
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [withdrawTo, setWithdrawTo] = useState("");
 
-  // Deployment section
   const [domainName, setDomainName] = useState("");
   const [initialPrice, setInitialPrice] = useState("");
-
-  // Transfer section
   const [transferDomainName, setTransferDomainName] = useState("");
-
-  // Manage section - which domain's vending machine to manage
   const [manageDomainName, setManageDomainName] = useState("random1996.rsk");
 
   const factoryDeployed = FACTORY_ADDRESS !== ZERO_ADDRESS;
 
-  // Write contracts and tx receipts (must be declared before canDeploy/canTransfer)
   const { writeContract: setPriceWrite, data: setPriceHash } = useWriteContract();
   const { writeContract: pauseWrite, data: pauseHash } = useWriteContract();
   const { writeContract: unpauseWrite, data: unpauseHash } = useWriteContract();
@@ -62,7 +56,6 @@ export default function AdminPage() {
     hash: transferHash,
   });
 
-  // Domain ownership check for deploy
   const deployParentNode = domainName.trim() ? namehash(domainName.trim()) : undefined;
   const { data: deployDomainOwner } = useReadContract({
     address: RNS_REGISTRY_ADDRESS,
@@ -89,7 +82,6 @@ export default function AdminPage() {
     deployDomainStatus() === "ready" &&
     !isDeploying;
 
-  // Vending machine lookup for deploy (check if already deployed)
   const { data: existingVm } = useReadContract({
     address: FACTORY_ADDRESS,
     abi: FACTORY_ABI,
@@ -103,7 +95,6 @@ export default function AdminPage() {
   const deployStatus = deployDomainStatus();
   const alreadyHasVm = existingVm && existingVm !== ZERO_ADDRESS;
 
-  // Transfer section
   const transferParentNode = transferDomainName.trim()
     ? namehash(transferDomainName.trim())
     : undefined;
@@ -145,7 +136,6 @@ export default function AdminPage() {
     !vmAlreadyOwnsTransfer &&
     !isTransferring;
 
-  // Manage section
   const manageParentNode = manageDomainName.trim()
     ? namehash(manageDomainName.trim())
     : undefined;
@@ -326,7 +316,6 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* 1. Deploy Section */}
         {factoryDeployed && (
           <div className="bg-white dark:bg-zinc-800 rounded-xl shadow-lg p-6 border border-zinc-200 dark:border-zinc-700 mb-8">
             <h2 className="text-2xl font-bold text-zinc-900 dark:text-white mb-4">
@@ -413,7 +402,6 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* 2. Transfer Ownership Section */}
         {factoryDeployed && (
           <div className="bg-white dark:bg-zinc-800 rounded-xl shadow-lg p-6 border border-zinc-200 dark:border-zinc-700 mb-8">
             <h2 className="text-2xl font-bold text-zinc-900 dark:text-white mb-4">
@@ -490,7 +478,6 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* 3. Manage Section */}
         <div className="bg-white dark:bg-zinc-800 rounded-xl shadow-lg p-6 border border-zinc-200 dark:border-zinc-700 mb-8">
           <h2 className="text-2xl font-bold text-zinc-900 dark:text-white mb-4">
             3. Manage Vending Machine

@@ -174,8 +174,6 @@ export const FACTORY_ABI = [
   },
 ] as const;
 
-// Factory address will be set after deployment
-// For now, use a placeholder - you'll need to update this after deploying the factory
 export const FACTORY_ADDRESS =
   (process.env.NEXT_PUBLIC_FACTORY_ADDRESS as `0x${string}`) ||
   ("0x0000000000000000000000000000000000000000" as `0x${string}`);
