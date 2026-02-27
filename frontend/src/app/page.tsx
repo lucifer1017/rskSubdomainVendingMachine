@@ -96,9 +96,7 @@ function HomePageContent() {
         functionName: "register",
         args: [label.trim(), address],
       });
-    } catch (error) {
-      console.error("Error minting:", error);
-    }
+    } catch {}
   };
 
   return (

@@ -203,9 +203,7 @@ export default function AdminPage() {
         functionName: "setPrice",
         args: [parseEther(newPrice)],
       });
-    } catch (e) {
-      console.error(e);
-    }
+    } catch {}
   };
 
   const handlePause = () => {
@@ -235,9 +233,7 @@ export default function AdminPage() {
         functionName: "withdraw",
         args: [withdrawTo as `0x${string}`, parseEther(withdrawAmount)],
       });
-    } catch (e) {
-      console.error(e);
-    }
+    } catch {}
   };
 
   const handleDeploy = () => {
@@ -251,9 +247,7 @@ export default function AdminPage() {
         functionName: "deployVendingMachine",
         args: [parentNode, priceInWei, address],
       });
-    } catch (e) {
-      console.error(e);
-    }
+    } catch {}
   };
 
   const handleTransfer = () => {
@@ -266,9 +260,7 @@ export default function AdminPage() {
         functionName: "setOwner",
         args: [parentNode, transferVmAddress],
       });
-    } catch (e) {
-      console.error(e);
-    }
+    } catch {}
   };
 
   if (!isConnected) {

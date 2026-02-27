@@ -29,6 +29,18 @@ npx hardhat compile
 npx hardhat test
 ```
 
+## Scripts
+
+| Script | Purpose |
+|--------|---------|
+| `check-ownership.ts` | Verify who owns a domain and whether the vending machine owns it. Set `CHECK_DOMAIN` env var (default: `test123.rsk`). |
+| `reclaim-parent.ts` | Pause a vending machine and reclaim the parent domain back to your wallet. Edit addresses in the file before running. |
+
+```bash
+npx hardhat run scripts/check-ownership.ts --network rskTestnet
+npx hardhat run scripts/reclaim-parent.ts --network rskTestnet
+```
+
 ## Deployment
 
 Everything is done from the **UI** except deploying the Factory.
